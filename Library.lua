@@ -4,16 +4,17 @@ local Player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-local subHolder = false -- ajustar conforme desejar para textSize
+local subHolder = false -- ajusta tamanho do texto
 
--- Função para criar e habilitar drag em frame
 local function enableDrag(frame, dragArea)
     local dragging, dragInput, startPos, startInputPos
     dragArea.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             startInputPos = input.Position
             startPos = frame.Position
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -21,11 +22,14 @@ local function enableDrag(frame, dragArea)
             end)
         end
     end)
+
     dragArea.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
+
     UIS.InputChanged:Connect(function(input)
         if dragging and input == dragInput then
             local delta = input.Position - startInputPos
@@ -39,14 +43,15 @@ local function enableDrag(frame, dragArea)
     end)
 end
 
--- Cria a janela principal
 function lib:Window(opts)
-    local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
+    opts = opts or {}
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = opts.Name or "CustomUI"
+    ScreenGui.Parent = Player:WaitForChild("PlayerGui")
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.ResetOnSpawn = false
 
-    local Main = Instance.new("Frame")
-    Main.Parent = ScreenGui
+    local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 250, 0, 200)
     Main.Position = UDim2.new(0.5, -125, 0.5, -100)
     Main.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
@@ -60,7 +65,7 @@ function lib:Window(opts)
     Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 7)
 
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Text = opts.Text or "Window"
+    Title.Text = opts.Title or "Minha UI"
     Title.Font = Enum.Font.LuckiestGuy
     Title.TextSize = subHolder and 16 or 17
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -79,6 +84,7 @@ function lib:Window(opts)
     MinBtn.TextSize = subHolder and 16 or 17
     MinBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     MinBtn.TextStrokeTransparency = 1
+    MinBtn.AutoButtonColor = false
 
     local minimized = false
     local fullHeight = 200
@@ -122,37 +128,27 @@ function lib:Window(opts)
         end
     end
 
-    setItemsVisible(true)
-
     MinBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
         if minimized then
             setItemsVisible(false)
-
-            local tweenMain = TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 250, 0, 40)})
-            local tweenItems = TweenService:Create(Items, TweenInfo.new(0.15), {Size = UDim2.new(1, 0, 0, 0)})
-
-            tweenItems:Play()
-            tweenMain:Play()
+            TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 250, 0, 40)}):Play()
+            TweenService:Create(Items, TweenInfo.new(0.15), {Size = UDim2.new(1, 0, 0, 0)}):Play()
             MinBtn.Text = "+"
         else
             setItemsVisible(true)
-
-            local tweenMain = TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 250, 0, fullHeight)})
-            local tweenItems = TweenService:Create(Items, TweenInfo.new(0.15), {Size = UDim2.new(1, 0, 1, -45)})
-
-            tweenItems:Play()
-            tweenMain:Play()
+            TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 250, 0, fullHeight)}):Play()
+            TweenService:Create(Items, TweenInfo.new(0.15), {Size = UDim2.new(1, 0, 1, -45)}):Play()
             MinBtn.Text = "-"
         end
     end)
 
     enableDrag(Main, TopBar)
 
-    -- API que retorna a janela criada com métodos para botões e toggles
     local windowAPI = {}
 
     function windowAPI:Button(opts)
+        opts = opts or {}
         local BtnFrame = Instance.new("Frame", Items)
         BtnFrame.Size = UDim2.new(0, 215, 0, 32)
         BtnFrame.BackgroundTransparency = 1
@@ -190,6 +186,7 @@ function lib:Window(opts)
     end
 
     function windowAPI:Toggle(opts)
+        opts = opts or {}
         local Container = Instance.new("Frame", Items)
         Container.Size = UDim2.new(0, 215, 0, 32)
         Container.BackgroundTransparency = 1
@@ -248,15 +245,6 @@ function lib:Window(opts)
         end)
 
         updateSize()
-    end
-
-    local function updateSize()
-        local contentHeight = UIList.AbsoluteContentSize.Y
-        local newHeight = math.clamp(contentHeight + 80, MIN_HEIGHT, MAX_HEIGHT)
-        if not minimized then
-            Main:TweenSize(UDim2.new(0, 250, 0, newHeight), "Out", "Quad", 0.15, true)
-            fullHeight = newHeight
-        end
     end
 
     return windowAPI
