@@ -247,3 +247,57 @@ function lib:Window(opts)
 end
 
 return lib
+
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+local NotificationGui = Instance.new("ScreenGui")
+NotificationGui.Name = "NotificationGui"
+NotificationGui.Parent = PlayerGui
+NotificationGui.ResetOnSpawn = false
+
+local function Notify(text, duration)
+    duration = duration or 3
+    local notifFrame = Instance.new("Frame")
+    notifFrame.Size = UDim2.new(0, 250, 0, 50)
+    notifFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    notifFrame.BackgroundTransparency = 0.5
+    notifFrame.AnchorPoint = Vector2.new(1, 1)  -- Ancoragem no canto inferior direito
+    notifFrame.Position = UDim2.new(1, -20, 1, -80) -- 20 pixels da direita, 80 pixels do fundo
+    notifFrame.Parent = NotificationGui
+    notifFrame.ZIndex = 10
+    Instance.new("UICorner", notifFrame).CornerRadius = UDim.new(0, 6)
+
+    local label = Instance.new("TextLabel", notifFrame)
+    label.Size = UDim2.new(1, -20, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Font = Enum.Font.SourceSansBold
+    label.TextSize = 20
+    label.Text = text
+    label.TextWrapped = true
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    label.TextYAlignment = Enum.TextYAlignment.Center
+
+    local TweenService = game:GetService("TweenService")
+
+    notifFrame.Position = notifFrame.Position + UDim2.new(0, 0, 0, 50)
+    notifFrame.BackgroundTransparency = 1
+    label.TextTransparency = 1
+
+    TweenService:Create(notifFrame, TweenInfo.new(0.3), {Position = notifFrame.Position - UDim2.new(0, 0, 0, 50), BackgroundTransparency = 0.5}):Play()
+    TweenService:Create(label, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+
+    delay(duration, function()
+        TweenService:Create(notifFrame, TweenInfo.new(0.3), {Position = notifFrame.Position + UDim2.new(0, 0, 0, 50), BackgroundTransparency = 1}):Play()
+        TweenService:Create(label, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        wait(0.3)
+        notifFrame:Destroy()
+    end)
+end
+
+-- Exemplo rápido
+Notify("Aqui está sua notificação!", 4)
