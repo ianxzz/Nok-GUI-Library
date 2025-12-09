@@ -4,17 +4,15 @@ local Player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-local subHolder = false -- ajusta tamanho do texto
+local subHolder = false -- ajustar conforme desejar para textSize
 
 local function enableDrag(frame, dragArea)
     local dragging, dragInput, startPos, startInputPos
     dragArea.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or
-           input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             startInputPos = input.Position
             startPos = frame.Position
-
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -22,14 +20,11 @@ local function enableDrag(frame, dragArea)
             end)
         end
     end)
-
     dragArea.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or
-           input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
-
     UIS.InputChanged:Connect(function(input)
         if dragging and input == dragInput then
             local delta = input.Position - startInputPos
@@ -44,14 +39,12 @@ local function enableDrag(frame, dragArea)
 end
 
 function lib:Window(opts)
-    opts = opts or {}
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = opts.Name or "CustomUI"
-    ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+    local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.ResetOnSpawn = false
 
-    local Main = Instance.new("Frame", ScreenGui)
+    local Main = Instance.new("Frame")
+    Main.Parent = ScreenGui
     Main.Size = UDim2.new(0, 250, 0, 200)
     Main.Position = UDim2.new(0.5, -125, 0.5, -100)
     Main.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
@@ -65,7 +58,7 @@ function lib:Window(opts)
     Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 7)
 
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Text = opts.Title or "Minha UI"
+    Title.Text = opts.Text or "Window"
     Title.Font = Enum.Font.LuckiestGuy
     Title.TextSize = subHolder and 16 or 17
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -148,7 +141,6 @@ function lib:Window(opts)
     local windowAPI = {}
 
     function windowAPI:Button(opts)
-        opts = opts or {}
         local BtnFrame = Instance.new("Frame", Items)
         BtnFrame.Size = UDim2.new(0, 215, 0, 32)
         BtnFrame.BackgroundTransparency = 1
@@ -186,7 +178,6 @@ function lib:Window(opts)
     end
 
     function windowAPI:Toggle(opts)
-        opts = opts or {}
         local Container = Instance.new("Frame", Items)
         Container.Size = UDim2.new(0, 215, 0, 32)
         Container.BackgroundTransparency = 1
@@ -245,6 +236,32 @@ function lib:Window(opts)
         end)
 
         updateSize()
+    end
+
+    function windowAPI:Label(opts)
+        local LabelFrame = Instance.new("Frame", Items)
+        LabelFrame.Size = UDim2.new(0, 215, 0, 24)
+        LabelFrame.BackgroundTransparency = 1
+
+        local Label = Instance.new("TextLabel", LabelFrame)
+        Label.Size = UDim2.new(1, 0, 1, 0)
+        Label.BackgroundTransparency = 1
+        Label.Font = Enum.Font.LuckiestGuy
+        Label.TextSize = subHolder and 16 or 17
+        Label.TextColor3 = opts.Color or Color3.fromRGB(220, 220, 220)
+        Label.Text = opts.Text or "Label"
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.TextStrokeTransparency = 1
+
+        updateSize()
+
+        return {
+            Set = function(self, properties)
+                for prop, val in pairs(properties) do
+                    Label[prop] = val
+                end
+            end
+        }
     end
 
     return windowAPI
