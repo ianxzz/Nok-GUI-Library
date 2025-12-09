@@ -217,7 +217,7 @@ function lib:Window(opts)
         end
 
         Click.MouseButton1Click:Connect(function()
-            setState(!state)
+            setState(not state)
         end)
 
         updateSize()
