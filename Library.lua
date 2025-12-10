@@ -37,6 +37,66 @@ local function enableDrag(frame, dragArea)
         end
     end)
 end
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+local screenGui = PlayerGui:FindFirstChild("NotificationGui")
+if not screenGui then
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "NotificationGui"
+    screenGui.Parent = PlayerGui
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+end
+
+local notificationsFolder = screenGui:FindFirstChild("NotificationsFolder")
+if not notificationsFolder then
+    notificationsFolder = Instance.new("Folder")
+    notificationsFolder.Name = "NotificationsFolder"
+    notificationsFolder.Parent = screenGui
+end
+
+local function createNotification(text, duration)
+    duration = duration or 3
+
+    local notifFrame = Instance.new("Frame")
+    notifFrame.Size = UDim2.new(0, 300, 0, 60)  -- Aumentado tamanho
+    notifFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    notifFrame.BorderSizePixel = 0
+    notifFrame.AnchorPoint = Vector2.new(1, 1)
+    notifFrame.Position = UDim2.new(1, -70, 1, -120)
+    notifFrame.BackgroundTransparency = 1
+    notifFrame.Parent = notificationsFolder
+    notifFrame.ClipsDescendants = true
+    notifFrame.ZIndex = 10
+    Instance.new("UICorner", notifFrame).CornerRadius = UDim.new(0, 8)
+
+    local notifText = Instance.new("TextLabel")
+    notifText.Size = UDim2.new(1, -20, 1, 0)
+    notifText.Position = UDim2.new(0, 10, 0, 0)
+    notifText.BackgroundTransparency = 1
+    notifText.TextColor3 = Color3.fromRGB(220, 220, 220)
+    notifText.Font = Enum.Font.LuckiestGuy
+    notifText.TextSize = 22  -- Texto maior para combinar
+    notifText.Text = text or "Notificação"
+    notifText.TextWrapped = true
+    notifText.TextXAlignment = Enum.TextXAlignment.Left
+    notifText.Parent = notifFrame
+
+    TweenService:Create(notifFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+
+    delay(duration, function()
+        local tween = TweenService:Create(notifFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1})
+        tween:Play()
+        tween.Completed:Wait()
+        notifFrame:Destroy()
+    end)
+end
+
+-- Exemplo:
+createNotification("Notificação maior e mais visível!", 4)
 
 function lib:Window(opts)
     local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
@@ -263,6 +323,169 @@ function lib:Window(opts)
             end
         }
     end
+function windowAPI:Dropdown(opts)
+    local Container = Instance.new("Frame", Items)
+    Container.Size = UDim2.new(0, 215, 0, 32)
+    Container.BackgroundTransparency = 1
+
+    local Label = Instance.new("TextLabel", Container)
+    Label.Size = UDim2.new(1, -40, 1, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.LuckiestGuy
+    Label.TextSize = subHolder and 16 or 17
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.Text = opts.Text or "Dropdown"
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextStrokeTransparency = 1
+
+    local Arrow = Instance.new("TextLabel", Container)
+    Arrow.Size = UDim2.new(0, 20, 1, 0)
+    Arrow.Position = UDim2.new(1, -30, 0, 0)
+    Arrow.BackgroundTransparency = 1
+    Arrow.Text = "▼"
+    Arrow.Font = Enum.Font.LuckiestGuy
+    Arrow.TextSize = subHolder and 16 or 17
+    Arrow.TextColor3 = Color3.fromRGB(220, 220, 220)
+
+    local dropdownOpen = false
+
+    local dropdownFrame = Instance.new("Frame", ScreenGui)
+    dropdownFrame.Size = UDim2.new(0, 150, 0, 0)
+    dropdownFrame.Position = Container.AbsolutePosition + Vector2.new(Container.AbsoluteSize.X + 5, 0)
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    dropdownFrame.BorderSizePixel = 0
+    dropdownFrame.ClipsDescendants = true
+    Instance.new("UICorner", dropdownFrame).CornerRadius = UDim.new(0, 7)
+    dropdownFrame.Visible = false
+    dropdownFrame.ZIndex = 20
+
+    local UIList = Instance.new("UIListLayout", dropdownFrame)
+    UIList.Padding = UDim.new(0, 4)
+    UIList.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local function closeDropdown()
+        dropdownOpen = false
+        dropdownFrame.Visible = false
+        dropdownFrame:TweenSize(UDim2.new(0, 150, 0, 0), "Out", "Quad", 0.2, true)
+        Arrow.Text = "▼"
+    end
+
+    local function openDropdown()
+        dropdownOpen = true
+        dropdownFrame.Visible = true
+        dropdownFrame:TweenSize(UDim2.new(0, 150, 0, #opts.Options * 28 + 8), "Out", "Quad", 0.2, true)
+        Arrow.Text = "▲"
+    end
+
+    Container.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if dropdownOpen then
+                closeDropdown()
+            else
+                openDropdown()
+            end
+        end
+    end)
+
+    local currentValue = opts.Default or opts.Options[1]
+    Label.Text = opts.Text .. ": " .. currentValue
+
+    for i, option in ipairs(opts.Options) do
+        local optionBtn = Instance.new("TextButton", dropdownFrame)
+        optionBtn.Size = UDim2.new(1, -10, 0, 28)
+        optionBtn.Position = UDim2.new(0, 5, 0, (i - 1) * 28 + 4)
+        optionBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        optionBtn.BorderSizePixel = 0
+        optionBtn.AutoButtonColor = false
+        optionBtn.Font = Enum.Font.LuckiestGuy
+        optionBtn.TextSize = subHolder and 16 or 17
+        optionBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+        optionBtn.Text = option
+        Instance.new("UICorner", optionBtn).CornerRadius = UDim.new(0, 5)
+
+        optionBtn.MouseEnter:Connect(function()
+            optionBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        end)
+        optionBtn.MouseLeave:Connect(function()
+            optionBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end)
+
+        optionBtn.MouseButton1Click:Connect(function()
+            currentValue = option
+            Label.Text = opts.Text .. ": " .. currentValue
+            if opts.Callback then
+                pcall(opts.Callback, currentValue)
+            end
+            closeDropdown()
+        end)
+    end
+
+    updateSize()
+end
+
+function windowAPI:Slider(opts)
+    local Container = Instance.new("Frame", Items)
+    Container.Size = UDim2.new(0, 215, 0, 50)
+    Container.BackgroundTransparency = 1
+
+    local Label = Instance.new("TextLabel", Container)
+    Label.Size = UDim2.new(1, 0, 0, 20)
+    Label.Position = UDim2.new(0, 12, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.LuckiestGuy
+    Label.TextSize = subHolder and 16 or 17
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.Text = opts.Text or "Slider"
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextStrokeTransparency = 1
+
+    local SliderBar = Instance.new("Frame", Container)
+    SliderBar.Size = UDim2.new(1, -24, 0, 12)
+    SliderBar.Position = UDim2.new(0, 12, 0, 30)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    SliderBar.BorderSizePixel = 0
+    SliderBar.ClipsDescendants = true
+    Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(0, 6)
+
+    local Fill = Instance.new("Frame", SliderBar)
+    Fill.Size = UDim2.new((opts.Default or 0) / (opts.Max or 100), 0, 1, 0)
+    Fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    Fill.BorderSizePixel = 0
+    Instance.new("UICorner", Fill).CornerRadius = UDim.new(0, 6)
+
+    local dragging = false
+
+    local function updateValue(x)
+        local relativeX = math.clamp(x - SliderBar.AbsolutePosition.X, 0, SliderBar.AbsoluteSize.X)
+        local percent = relativeX / SliderBar.AbsoluteSize.X
+        Fill.Size = UDim2.new(percent, 0, 1, 0)
+        local value = math.floor((opts.Max or 100) * percent)
+        Label.Text = opts.Text .. ": " .. tostring(value)
+        if opts.Callback then
+            pcall(opts.Callback, value)
+        end
+    end
+
+    SliderBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            updateValue(input.Position.X)
+        end
+    end)
+    SliderBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    SliderBar.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateValue(input.Position.X)
+        end
+    end)
+
+    updateSize()
+end
 
     return windowAPI
 end
