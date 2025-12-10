@@ -46,7 +46,7 @@ function lib:Window(opts)
     local Main = Instance.new("Frame")
     Main.Parent = ScreenGui
     Main.Size = UDim2.new(0, 250, 0, 200)
-    Main.Position = UDim2.new(0.5, -125, 0.5, -100)
+    Main.Position = UDim2.new(0, 64, 0, 40)
     Main.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     Main.BorderSizePixel = 0
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 7)
