@@ -6,7 +6,6 @@ local TweenService = game:GetService("TweenService")
 
 local subHolder = false -- ajustar conforme desejar para textSize
 
-
 local function enableDrag(frame, dragArea)
     local dragging, dragInput, startPos, startInputPos
     dragArea.InputBegan:Connect(function(input)
@@ -38,10 +37,6 @@ local function enableDrag(frame, dragArea)
         end
     end)
 end
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
 
 function lib:Window(opts)
     local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
