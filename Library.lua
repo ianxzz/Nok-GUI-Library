@@ -2,7 +2,7 @@ local lib = {}
 
 local Player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+ TweenService = game:GetService("TweenService")
 
 local function enableDrag(frame, dragArea)
 	local dragging, dragInput, startPos, startInputPos
@@ -36,7 +36,6 @@ local function CreateNotification(Title, Text, Duration)
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 999999999
 	gui.Parent = pgui
-
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.new(0,280,0,78)
 	frame.Position = UDim2.new(1,20,0,168)
@@ -44,12 +43,10 @@ local function CreateNotification(Title, Text, Duration)
 	frame.BorderSizePixel = 0
 	frame.Parent = gui
 	Instance.new("UICorner",frame).CornerRadius = UDim.new(0,12)
-
 	local stroke = Instance.new("UIStroke",frame)
 	stroke.Thickness = 2
 	stroke.Color = Color3.fromRGB(60,60,60)
 	stroke.Transparency = 0.3
-
 	local title = Instance.new("TextLabel",frame)
 	title.Size = UDim2.new(1,-20,0,28)
 	title.Position = UDim2.new(0,10,0,8)
@@ -59,7 +56,6 @@ local function CreateNotification(Title, Text, Duration)
 	title.FontFace = Font.fromEnum(Enum.Font.GothamBold)
 	title.TextSize = 24
 	title.TextXAlignment = Enum.TextXAlignment.Left
-
 	local desc = Instance.new("TextLabel",frame)
 	desc.Size = UDim2.new(1,-20,0,36)
 	desc.Position = UDim2.new(0,10,0,34)
@@ -71,17 +67,14 @@ local function CreateNotification(Title, Text, Duration)
 	desc.TextWrapped = true
 	desc.TextXAlignment = Enum.TextXAlignment.Left
 	desc.TextYAlignment = Enum.TextYAlignment.Top
-
 	local barBg = Instance.new("Frame",frame)
 	barBg.Size = UDim2.new(1,0,0,5)
 	barBg.Position = UDim2.new(0,0,1,-5)
 	barBg.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	Instance.new("UICorner",barBg).CornerRadius = UDim.new(0,3)
-
 	local bar = Instance.new("Frame",barBg)
 	bar.Size = UDim2.new(1,0,1,0)
 	bar.BackgroundColor3 = Color3.fromRGB(100,149,237)
-
 	frame:TweenPosition(UDim2.new(0,626,0,168),"Out","Quint",0.5,true)
 	bar:TweenSize(UDim2.new(0,0,1,0),"In","Linear",Duration,true)
 	task.wait(Duration + 0.5)
@@ -183,14 +176,12 @@ local function createWindow(name, posX, posY)
 
 	local api = {}
 
-	-- LABEL
 	function api:Label(opts)
 		opts = opts or {}
 		local container = Instance.new("Frame")
 		container.Size = UDim2.new(0,215,0,26)
 		container.BackgroundTransparency = 1
 		container.Parent = Items
-
 		local label = Instance.new("TextLabel")
 		label.Size = UDim2.new(1,-24,1,0)
 		label.Position = UDim2.new(0,12,0,0)
@@ -202,24 +193,22 @@ local function createWindow(name, posX, posY)
 		label.Text = opts.Text or "Label"
 		label.TextTruncate = Enum.TextTruncate.AtEnd
 		label.Parent = container
-
 		local function refresh() task.spawn(updateSize) end
 		local labelApi = {}
 		function labelApi:Set(data)
 			if typeof(data)=="table" then
-				if data.Text then label.Text=tostring(data.Text) end
+				if data.Text then label.Text = tostring(data.Text) end
 				if data.Color or data.TextColor3 then label.TextColor3 = data.Color or data.TextColor3 end
-			else label.Text=tostring(data) end
+			else label.Text = tostring(data) end
 			refresh()
 		end
-		function labelApi:SetColor(c) label.TextColor3=c refresh() end
+		function labelApi:SetColor(c) label.TextColor3 = c refresh() end
 		function labelApi:Get() return label.Text end
 		labelApi.Update = labelApi.Set
 		refresh()
 		return labelApi
 	end
 
-	-- BUTTON
 	function api:Button(opts)
 		opts = opts or {}
 		local f = Instance.new("Frame",Items)
@@ -248,7 +237,6 @@ local function createWindow(name, posX, posY)
 		updateSize()
 	end
 
-	-- TOGGLE (sempre começa desligado)
 	function api:Toggle(opts)
 		opts = opts or {}
 		local c = Instance.new("Frame",Items)
@@ -263,24 +251,20 @@ local function createWindow(name, posX, posY)
 		l.TextColor3 = Color3.fromRGB(220,220,220)
 		l.Text = opts.Text or "Toggle"
 		l.TextXAlignment = Enum.TextXAlignment.Left
-
 		local s = Instance.new("Frame",c)
 		s.Size = UDim2.new(0,40,0,18)
 		s.Position = UDim2.new(1,-50,0.5,-9)
 		s.BackgroundColor3 = Color3.fromRGB(60,60,60)
 		Instance.new("UICorner",s).CornerRadius = UDim.new(1,0)
-
 		local d = Instance.new("Frame",s)
 		d.Size = UDim2.new(0,16,0,16)
 		d.Position = UDim2.new(0,2,0.5,-8)
 		d.BackgroundColor3 = Color3.fromRGB(200,200,200)
 		Instance.new("UICorner",d).CornerRadius = UDim.new(1,0)
-
 		local cl = Instance.new("TextButton",c)
 		cl.Size = UDim2.new(1,0,1,0)
 		cl.BackgroundTransparency = 1
 		cl.Text = ""
-
 		local state = false
 		local function set(v)
 			state = v
@@ -301,14 +285,12 @@ local function createWindow(name, posX, posY)
 		return {Set=set,Get=function()return state end}
 	end
 
-	-- DROPDOWN (completo)
 	function api:Dropdown(opts)
 		opts = opts or {}
 		local container = Instance.new("Frame")
 		container.Size = UDim2.new(0,215,0,56)
 		container.BackgroundTransparency = 1
 		container.Parent = Items
-
 		local label = Instance.new("TextLabel",container)
 		label.Size = UDim2.new(1,-20,0,24)
 		label.Position = UDim2.new(0,12,0,0)
@@ -318,7 +300,6 @@ local function createWindow(name, posX, posY)
 		label.TextColor3 = Color3.fromRGB(220,220,220)
 		label.Text = opts.Text or "Dropdown"
 		label.TextXAlignment = Enum.TextXAlignment.Left
-
 		local btn = Instance.new("TextButton",container)
 		btn.Size = UDim2.new(0,215,0,32)
 		btn.Position = UDim2.new(0,0,0,26)
@@ -328,7 +309,6 @@ local function createWindow(name, posX, posY)
 		btn.Font = Enum.Font.LuckiestGuy
 		btn.TextSize = 17
 		Instance.new("UICorner",btn).CornerRadius = UDim.new(0,7)
-
 		local arrow = Instance.new("TextLabel",btn)
 		arrow.Size = UDim2.new(0,30,1,0)
 		arrow.Position = UDim2.new(1,-35,0,0)
@@ -337,7 +317,6 @@ local function createWindow(name, posX, posY)
 		arrow.TextColor3 = Color3.fromRGB(220,220,220)
 		arrow.Font = Enum.Font.SourceSansBold
 		arrow.TextSize = 20
-
 		local listHolder = Instance.new("Frame")
 		listHolder.Size = UDim2.new(0,140,0,150)
 		listHolder.BackgroundColor3 = Color3.fromRGB(40,40,40)
@@ -345,28 +324,23 @@ local function createWindow(name, posX, posY)
 		listHolder.Visible = false
 		Instance.new("UICorner",listHolder).CornerRadius = UDim.new(0,7)
 		listHolder.Parent = ScreenGui
-
 		local scrolling = Instance.new("ScrollingFrame",listHolder)
 		scrolling.Size = UDim2.new(1,0,1,0)
 		scrolling.BackgroundTransparency = 1
 		scrolling.BorderSizePixel = 0
 		scrolling.ScrollBarThickness = 6
 		scrolling.ScrollBarImageColor3 = Color3.fromRGB(100,100,100)
-
 		local layout = Instance.new("UIListLayout",scrolling)
 		layout.Padding = UDim.new(0,2)
-
 		local open = false
 		local selected = 1
 		local options = opts.Options or {}
-
 		local function reposition()
 			local mainPos = Main.AbsolutePosition
 			local mainSize = Main.AbsoluteSize
 			local btnPos = btn.AbsolutePosition
 			listHolder.Position = UDim2.new(0,mainPos.X + mainSize.X + 5,0,btnPos.Y)
 		end
-
 		local function toggle()
 			open = not open
 			listHolder.Visible = open
@@ -376,9 +350,7 @@ local function createWindow(name, posX, posY)
 			end
 			arrow.Text = open and "-" or "+"
 		end
-
 		btn.MouseButton1Click:Connect(toggle)
-
 		UIS.InputBegan:Connect(function(i)
 			if open and i.UserInputType == Enum.UserInputType.MouseButton1 then
 				local p = i.Position
@@ -392,11 +364,9 @@ local function createWindow(name, posX, posY)
 				end
 			end
 		end)
-
 		Main:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
 			if open then reposition() end
 		end)
-
 		for i,opt in ipairs(options) do
 			local b = Instance.new("TextButton",scrolling)
 			b.Size = UDim2.new(1,-8,0,32)
@@ -414,11 +384,8 @@ local function createWindow(name, posX, posY)
 				toggle()
 				if opts.Callback then pcall(opts.Callback,opt) end
 			end)
-		end)
 		end
-
 		updateSize()
-
 		return {
 			Get = function() return options[selected] end,
 			Set = function(v)
@@ -429,14 +396,12 @@ local function createWindow(name, posX, posY)
 		}
 	end
 
-	-- SLIDER (completo)
 	function api:Slider(opts)
 		opts = opts or {}
 		local container = Instance.new("Frame")
 		container.Size = UDim2.new(0,215,0,50)
 		container.BackgroundTransparency = 1
 		container.Parent = Items
-
 		local label = Instance.new("TextLabel",container)
 		label.Size = UDim2.new(1,-20,0,24)
 		label.Position = UDim2.new(0,12,0,0)
@@ -446,18 +411,15 @@ local function createWindow(name, posX, posY)
 		label.TextColor3 = Color3.fromRGB(220,220,220)
 		label.Text = opts.Text or "Slider"
 		label.TextXAlignment = Enum.TextXAlignment.Left
-
 		local bar = Instance.new("Frame",container)
 		bar.Size = UDim2.new(0,215,0,18)
 		bar.Position = UDim2.new(0,0,0,26)
 		bar.BackgroundColor3 = Color3.fromRGB(60,60,60)
 		Instance.new("UICorner",bar).CornerRadius = UDim.new(0,7)
-
 		local fill = Instance.new("Frame",bar)
 		fill.Size = UDim2.new(0,0,1,0)
 		fill.BackgroundColor3 = Color3.fromRGB(0,170,255)
 		Instance.new("UICorner",fill).CornerRadius = UDim.new(0,7)
-
 		local valLabel = Instance.new("TextLabel",container)
 		valLabel.Size = UDim2.new(0,50,0,20)
 		valLabel.Position = UDim2.new(1,-55,0,26)
@@ -467,14 +429,11 @@ local function createWindow(name, posX, posY)
 		valLabel.TextSize = 17
 		valLabel.TextXAlignment = Enum.TextXAlignment.Center
 		valLabel.Text = tostring(opts.Default or opts.Min or 0)
-
 		local minV = opts.Min or 0
 		local maxV = opts.Max or 100
 		local step = opts.Step or 1
 		local cur = opts.Default or minV
-
 		local dragging = false
-
 		local function update(x)
 			local pct = math.clamp((x - bar.AbsolutePosition.X)/bar.AbsoluteSize.X,0,1)
 			cur = minV + math.floor((maxV-minV)*pct/step + 0.5)*step
@@ -483,30 +442,25 @@ local function createWindow(name, posX, posY)
 			valLabel.Text = tostring(cur)
 			if opts.Callback then pcall(opts.Callback,cur) end
 		end
-
 		bar.InputBegan:Connect(function(i)
 			if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 				dragging = true
 				update(i.Position.X)
 			end
 		end)
-
 		bar.InputChanged:Connect(function(i)
 			if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
 				update(i.Position.X)
 			end
 		end)
-
 		UIS.InputEnded:Connect(function(i)
 			if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 				dragging = false
 			end
 		end)
-
 		fill.Size = UDim2.new((cur-minV)/(maxV-minV),0,1,0)
 		valLabel.Text = tostring(cur)
 		updateSize()
-
 		return {
 			Get = function() return cur end,
 			Set = function(v)
@@ -523,7 +477,6 @@ local function createWindow(name, posX, posY)
 	return api
 end
 
--- AS 3 JANELAS
 function lib:Window(opts)  return createWindow(opts.Text or "Window", 64, 40) end
 function lib:Window2(opts) return createWindow(opts.Text or "Window 2", 354, -6) end
 function lib:Window3(opts) return createWindow(opts.Text or "Window 3", 632, -14) end
