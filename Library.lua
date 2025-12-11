@@ -26,13 +26,13 @@ local function enableDrag(frame, dragArea)
 	UIS.InputChanged:Connect(function(input)
 		if dragging and input == dragInput then
 			local delta = input.Position - startInputPos
-			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			frame.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
 		end
 	end)
 end
 
 function lib:Window(opts)
-	local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
+	local ScreenGui = Instance.new("ScreenGui",Player:WaitForChild("PlayerGui"))
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
 
@@ -128,7 +128,6 @@ function lib:Window(opts)
 		local f = Instance.new("Frame",Items)
 		f.Size = UDim2.new(0,215,0,32)
 		f.BackgroundTransparency = 1
-
 		local b = Instance.new("TextButton",f)
 		b.Size = UDim2.new(1,0,1,0)
 		b.BackgroundTransparency = 1
@@ -138,15 +137,11 @@ function lib:Window(opts)
 		b.TextColor3 = Color3.fromRGB(220,220,220)
 		b.TextXAlignment = Enum.TextXAlignment.Left
 		b.Position = UDim2.new(0,12,0,0)
-
-		b.MouseEnter:Connect(function() b.TextColor3 = Color3.fromRGB(255,255,255) end)
-		b.MouseLeave:Connect(function() b.TextColor3 = Color3.fromRGB(220,220,220) end)
+		b.MouseEnter:Connect(function()b.TextColor3=Color3.fromRGB(255,255,255)end)
+		b.MouseLeave:Connect(function()b.TextColor3=Color3.fromRGB(220,220,220)end)
 		b.MouseButton1Click:Connect(function()
 			b.TextColor3 = Color3.fromRGB(100,200,255)
-			task.delay(0.15,function()
-				b.TextColor3 = Color3.fromRGB(255,255,255)
-				task.delay(0.15,function() b.TextColor3 = Color3.fromRGB(220,220,220) end)
-			end)
+			task.delay(0.15,function()b.TextColor3=Color3.fromRGB(255,255,255)task.delay(0.15,function()b.TextColor3=Color3.fromRGB(220,220,220)end)end)
 			if opts.Callback then pcall(opts.Callback) end
 		end)
 		updateSize()
@@ -156,7 +151,6 @@ function lib:Window(opts)
 		local c = Instance.new("Frame",Items)
 		c.Size = UDim2.new(0,215,0,32)
 		c.BackgroundTransparency = 1
-
 		local l = Instance.new("TextLabel",c)
 		l.Size = UDim2.new(1,-60,1,0)
 		l.Position = UDim2.new(0,12,0,0)
@@ -166,24 +160,20 @@ function lib:Window(opts)
 		l.TextColor3 = Color3.fromRGB(220,220,220)
 		l.Text = opts.Text or "Toggle"
 		l.TextXAlignment = Enum.TextXAlignment.Left
-
 		local s = Instance.new("Frame",c)
 		s.Size = UDim2.new(0,40,0,18)
 		s.Position = UDim2.new(1,-50,0.5,-9)
 		s.BackgroundColor3 = Color3.fromRGB(60,60,60)
 		Instance.new("UICorner",s).CornerRadius = UDim.new(1,0)
-
 		local d = Instance.new("Frame",s)
 		d.Size = UDim2.new(0,16,0,16)
 		d.Position = UDim2.new(0,2,0.5,-8)
 		d.BackgroundColor3 = Color3.fromRGB(200,200,200)
 		Instance.new("UICorner",d).CornerRadius = UDim.new(1,0)
-
 		local cl = Instance.new("TextButton",c)
 		cl.Size = UDim2.new(1,0,1,0)
 		cl.BackgroundTransparency = 1
 		cl.Text = ""
-
 		local state = opts.Default or false
 		local function set(v)
 			state = v
@@ -199,7 +189,7 @@ function lib:Window(opts)
 			if opts.Callback then pcall(opts.Callback,state) end
 		end
 		set(state)
-		cl.MouseButton1Click:Connect(function() set(not state) end)
+		cl.MouseButton1Click:Connect(function()set(not state)end)
 		updateSize()
 		return {Set=set,Get=function()return state end}
 	end
@@ -208,7 +198,6 @@ function lib:Window(opts)
 		local f = Instance.new("Frame",Items)
 		f.Size = UDim2.new(0,215,0,24)
 		f.BackgroundTransparency = 1
-
 		local l = Instance.new("TextLabel",f)
 		l.Size = UDim2.new(1,0,1,0)
 		l.BackgroundTransparency = 1
@@ -217,7 +206,6 @@ function lib:Window(opts)
 		l.TextColor3 = opts.Color or Color3.fromRGB(220,220,220)
 		l.Text = opts.Text or "Label"
 		l.TextXAlignment = Enum.TextXAlignment.Left
-
 		updateSize()
 		return {Set=function(p)for i,v in pairs(p)do l[i]=v end end}
 	end
@@ -252,7 +240,7 @@ function lib:Window(opts)
 		arrow.Size = UDim2.new(0,30,1,0)
 		arrow.Position = UDim2.new(1,-35,0,0)
 		arrow.BackgroundTransparency = 1
-		arrow.Text = "▼"
+		arrow.Text = "Down Arrow"
 		arrow.TextColor3 = Color3.fromRGB(220,220,220)
 		arrow.Font = Enum.Font.LuckiestGuy
 		arrow.TextSize = 18
@@ -272,23 +260,23 @@ function lib:Window(opts)
 		local selected = 1
 		local options = opts.Options or {}
 
-		local function positionList()
+		local function reposition()
 			local mainPos = Main.AbsolutePosition
 			local mainSize = Main.AbsoluteSize
 			local btnPos = btn.AbsolutePosition
-			list.Position = UDim2.new(0, mainPos.X + mainSize.X + 5, 0, btnPos.Y)
+			list.Position = UDim2.new(0,mainPos.X + mainSize.X + 5,0,btnPos.Y)
 		end
 
 		local function toggle()
 			open = not open
 			list.Visible = open
 			if open then
-				positionList()
+				reposition()
 				TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{Size=UDim2.new(0,130,0,math.min(#options*34,150))}):Play()
 			else
 				TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{Size=UDim2.new(0,130,0,0)}):Play()
 			end
-			arrow.Text = open and "▲" or "▼"
+			arrow.Text = open and "Up Arrow" or "Down Arrow"
 		end
 
 		btn.MouseButton1Click:Connect(toggle)
@@ -296,15 +284,19 @@ function lib:Window(opts)
 		UIS.InputBegan:Connect(function(i)
 			if open and i.UserInputType == Enum.UserInputType.MouseButton1 then
 				local p = i.Position
-				local listA = list.AbsolutePosition
-				local listS = list.AbsoluteSize
-				local btnA = btn.AbsolutePosition
-				local btnS = btn.AbsoluteSize
-				if not (p.X >= listA.X and p.X <= listA.X + listS.X and p.Y >= listA.Y and p.Y <= listA.Y + listS.Y or
-					p.X >= btnA.X and p.X <= btnA.X + btnS.X and p.Y >= btnA.Y and p.Y <= btnA.Y + btnS.Y) then
+				local a = list.AbsolutePosition
+				local s = list.AbsoluteSize
+				local ba = btn.AbsolutePosition
+				local bs = btn.AbsoluteSize
+				if not (p.X >= a.X and p.X <= a.X+s.X and p.Y >= a.Y and p.Y <= a.Y+s.Y or
+				        p.X >= ba.X and p.X <= ba.X+bs.X and p.Y >= ba.Y and p.Y <= ba.Y+bs.Y) then
 					toggle()
 				end
 			end
+		end)
+
+		Main:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+			if open then reposition() end
 		end)
 
 		for i,opt in ipairs(options) do
@@ -316,8 +308,8 @@ function lib:Window(opts)
 			b.Font = Enum.Font.LuckiestGuy
 			b.TextSize = subHolder and 16 or 17
 			b.TextColor3 = Color3.fromRGB(220,220,220)
-			b.MouseEnter:Connect(function() b.BackgroundTransparency = 0.5 b.BackgroundColor3 = Color3.fromRGB(70,70,70) end)
-			b.MouseLeave:Connect(function() b.BackgroundTransparency = 1 end)
+			b.MouseEnter:Connect(function()b.BackgroundTransparency=0.5 b.BackgroundColor3=Color3.fromRGB(70,70,70)end)
+			b.MouseLeave:Connect(function()b.BackgroundTransparency=1 end)
 			b.MouseButton1Click:Connect(function()
 				selected = i
 				btn.Text = opt
@@ -325,10 +317,6 @@ function lib:Window(opts)
 				if opts.Callback then pcall(opts.Callback,opt) end
 			end)
 		end
-
-		Main:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-			if open then positionList() end
-		end)
 
 		updateSize()
 
