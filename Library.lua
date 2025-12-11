@@ -36,7 +36,7 @@ function lib:Window(opts)
 
 	local Main = Instance.new("Frame")
 	Main.Parent = ScreenGui
-	Main.Size = UDim2.new(0,250,0,40)
+	Main.Size = UDim2.new(0,250,0,200)
 	Main.Position = UDim2.new(0.5,-125,0.5,-100)
 	Main.BackgroundColor3 = Color3.fromRGB(22,22,22)
 	Main.BorderSizePixel = 0
@@ -62,44 +62,58 @@ function lib:Window(opts)
 	MinBtn.Size = UDim2.new(0,40,1,0)
 	MinBtn.Position = UDim2.new(1,-40,0,0)
 	MinBtn.BackgroundTransparency = 1
-	MinBtn.Text = "+"
+	MinBtn.Text = "-"
 	MinBtn.Font = Enum.Font.LuckiestGuy
 	MinBtn.TextSize = 17
 	MinBtn.TextColor3 = Color3.fromRGB(200,200,200)
 	MinBtn.AutoButtonColor = false
 
-	local minimized = true
+	local minimized = false
 	local fullHeight = 200
 
 	local Items = Instance.new("Frame",Main)
 	Items.BackgroundTransparency = 1
 	Items.Position = UDim2.new(0,0,0,45)
 	Items.Size = UDim2.new(1,0,1,-45)
-	Items.Visible = false
 
 	local UIList = Instance.new("UIListLayout",Items)
 	UIList.Padding = UDim.new(0,8)
 	UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 	local function updateSize()
-		if minimized then return end
-		local contentHeight = UIList.AbsoluteContentSize.Y
-		local newHeight = math.clamp(contentHeight + 80, 120, 350)
-		fullHeight = newHeight
-		Main:TweenSize(UDim2.new(0,250,0,newHeight),"Out","Quad",0.2,true)
+		local newHeight = math.clamp(UIList.AbsoluteContentSize.Y + 80,120,350)
+		if not minimized then
+			Main:TweenSize(UDim2.new(0,250,0,newHeight),"Out","Quad",0.15,true)
+			fullHeight = newHeight
+		end
 	end
-
 	UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSize)
+
+	local function setItemsVisible(v)
+		for _,c in Items:GetChildren() do
+			if c:IsA("Frame") then
+				c.Visible = v
+				for _,s in c:GetChildren() do
+					if s:IsA("GuiButton") or s:IsA("TextLabel") then
+						s.Visible = v
+						if s:IsA("GuiButton") then s.Active = v end
+					end
+				end
+			end
+		end
+	end
 
 	MinBtn.MouseButton1Click:Connect(function()
 		minimized = not minimized
 		if minimized then
-			Items.Visible = false
-			TweenService:Create(Main,TweenInfo.new(0.2),{Size = UDim2.new(0,250,0,40)}):Play()
+			setItemsVisible(false)
+			TweenService:Create(Main,TweenInfo.new(0.2),{Size=UDim2.new(0,250,0,40)}):Play()
+			TweenService:Create(Items,TweenInfo.new(0.15),{Size=UDim2.new(1,0,0,0)}):Play()
 			MinBtn.Text = "+"
 		else
-			Items.Visible = true
-			updateSize()
+			setItemsVisible(true)
+			TweenService:Create(Main,TweenInfo.new(0.2),{Size=UDim2.new(0,250,0,fullHeight)}):Play()
+			TweenService:Create(Items,TweenInfo.new(0.15),{Size=UDim2.new(1,0,1,-45)}):Play()
 			MinBtn.Text = "-"
 		end
 	end)
@@ -192,9 +206,9 @@ function lib:Window(opts)
 		l.TextXAlignment = Enum.TextXAlignment.Left
 		updateSize()
 		return {
-			Set = function(self,t) l.Text = t end,
-			Update = function(self,t) l.Text = t end,
-			SetColor = function(self,c) l.TextColor3 = c end
+			Set = function(self,text) l.Text = text end,
+			Update = function(self,text) l.Text = text end,
+			SetColor = function(self,color) l.TextColor3 = color end
 		}
 	end
 
@@ -244,6 +258,7 @@ function lib:Window(opts)
 		local scrolling = Instance.new("ScrollingFrame",listHolder)
 		scrolling.Size = UDim2.new(1,0,1,0)
 		scrolling.BackgroundTransparency = 1
+		scrolling.BorderSizePixel = 0
 		scrolling.ScrollBarThickness = 6
 		scrolling.ScrollBarImageColor3 = Color3.fromRGB(100,100,100)
 
@@ -276,10 +291,12 @@ function lib:Window(opts)
 		UIS.InputBegan:Connect(function(i)
 			if open and i.UserInputType == Enum.UserInputType.MouseButton1 then
 				local p = i.Position
-				if not (p.X >= listHolder.AbsolutePosition.X and p.X <= listHolder.AbsolutePosition.X + listHolder.AbsoluteSize.X and
-				        p.Y >= listHolder.AbsolutePosition.Y and p.Y <= listHolder.AbsolutePosition.Y + listHolder.AbsoluteSize.Y or
-				        p.X >= btn.AbsolutePosition.X and p.X <= btn.AbsolutePosition.X + btn.AbsoluteSize.X and
-				        p.Y >= btn.AbsolutePosition.Y and p.Y <= btn.AbsolutePosition.Y + btn.AbsoluteSize.Y) then
+				local la = listHolder.AbsolutePosition
+				local ls = listHolder.AbsoluteSize
+				local ba = btn.AbsolutePosition
+				local bs = btn.AbsoluteSize
+				if not (p.X >= la.X and p.X <= la.X+ls.X and p.Y >= la.Y and p.Y <= la.Y+ls.Y or
+				        p.X >= ba.X and p.X <= ba.X+bs.X and p.Y >= ba.Y and p.Y <= ba.Y+bs.Y) then
 					toggle()
 				end
 			end
