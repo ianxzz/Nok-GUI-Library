@@ -252,19 +252,18 @@ function lib:Window(opts)
 		arrow.Size = UDim2.new(0,30,1,0)
 		arrow.Position = UDim2.new(1,-35,0,0)
 		arrow.BackgroundTransparency = 1
-		arrow.Text = "Down Arrow"
+		arrow.Text = "▼"
 		arrow.TextColor3 = Color3.fromRGB(220,220,220)
 		arrow.Font = Enum.Font.LuckiestGuy
 		arrow.TextSize = 18
 
 		local list = Instance.new("Frame")
-		list.Size = UDim2.new(0,215,0,0)
-		list.Position = UDim2.new(0,0,1,2)
+		list.Size = UDim2.new(0,130,0,0)
 		list.BackgroundColor3 = Color3.fromRGB(40,40,40)
 		list.ClipsDescendants = true
 		list.Visible = false
 		Instance.new("UICorner",list).CornerRadius = UDim.new(0,7)
-		list.Parent = btn
+		list.Parent = ScreenGui
 
 		local layout = Instance.new("UIListLayout",list)
 		layout.Padding = UDim.new(0,2)
@@ -273,13 +272,23 @@ function lib:Window(opts)
 		local selected = 1
 		local options = opts.Options or {}
 
+		local function positionList()
+			local mainPos = Main.AbsolutePosition
+			local mainSize = Main.AbsoluteSize
+			local btnPos = btn.AbsolutePosition
+			list.Position = UDim2.new(0, mainPos.X + mainSize.X + 5, 0, btnPos.Y)
+		end
+
 		local function toggle()
 			open = not open
 			list.Visible = open
-			TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{
-				Size = open and UDim2.new(0,215,0,math.min(#options*34,150)) or UDim2.new(0,215,0,0)
-			}):Play()
-			arrow.Text = open and "Up Arrow" or "Down Arrow"
+			if open then
+				positionList()
+				TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{Size=UDim2.new(0,130,0,math.min(#options*34,150))}):Play()
+			else
+				TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{Size=UDim2.new(0,130,0,0)}):Play()
+			end
+			arrow.Text = open and "▲" or "▼"
 		end
 
 		btn.MouseButton1Click:Connect(toggle)
@@ -287,9 +296,12 @@ function lib:Window(opts)
 		UIS.InputBegan:Connect(function(i)
 			if open and i.UserInputType == Enum.UserInputType.MouseButton1 then
 				local p = i.Position
-				local a = list.AbsolutePosition
-				local s = list.AbsoluteSize
-				if not (p.X >= a.X and p.X <= a.X+s.X and p.Y >= a.Y and p.Y <= a.Y+s.Y) then
+				local listA = list.AbsolutePosition
+				local listS = list.AbsoluteSize
+				local btnA = btn.AbsolutePosition
+				local btnS = btn.AbsoluteSize
+				if not (p.X >= listA.X and p.X <= listA.X + listS.X and p.Y >= listA.Y and p.Y <= listA.Y + listS.Y or
+					p.X >= btnA.X and p.X <= btnA.X + btnS.X and p.Y >= btnA.Y and p.Y <= btnA.Y + btnS.Y) then
 					toggle()
 				end
 			end
@@ -313,6 +325,10 @@ function lib:Window(opts)
 				if opts.Callback then pcall(opts.Callback,opt) end
 			end)
 		end
+
+		Main:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+			if open then positionList() end
+		end)
 
 		updateSize()
 
