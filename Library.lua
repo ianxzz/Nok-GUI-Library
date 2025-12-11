@@ -36,14 +36,14 @@ function lib:Window(opts)
 
 	local Main = Instance.new("Frame")
 	Main.Parent = ScreenGui
-	Main.Size = UDim2.new(0,250,0,40)        -- Começa minimizada
-	Main.Position = UDim2.new(0.5,-125,0.5,-20)
+	Main.Size = UDim2.new(0,250,0,40)
+	Main.Position = UDim2.new(0.5,-125,0.5,-100)
 	Main.BackgroundColor3 = Color3.fromRGB(22,22,22)
 	Main.BorderSizePixel = 0
 	Instance.new("UICorner",Main).CornerRadius = UDim.new(0,7)
 
 	local TopBar = Instance.new("Frame",Main)
-	TopBar.Size = UDim2.new(1,0,1,0)
+	TopBar.Size = UDim2.new(1,0,0,40)
 	TopBar.BackgroundColor3 = Color3.fromRGB(28,28,28)
 	TopBar.BorderSizePixel = 0
 	Instance.new("UICorner",TopBar).CornerRadius = UDim.new(0,7)
@@ -62,59 +62,44 @@ function lib:Window(opts)
 	MinBtn.Size = UDim2.new(0,40,1,0)
 	MinBtn.Position = UDim2.new(1,-40,0,0)
 	MinBtn.BackgroundTransparency = 1
-	MinBtn.Text = "-"           -- Começa aberta? Não, começa fechada (só título)
+	MinBtn.Text = "+"
 	MinBtn.Font = Enum.Font.LuckiestGuy
 	MinBtn.TextSize = 17
 	MinBtn.TextColor3 = Color3.fromRGB(200,200,200)
 	MinBtn.AutoButtonColor = false
 
-	local minimized = true          -- <-- Agora começa minimizada
+	local minimized = true
 	local fullHeight = 200
 
 	local Items = Instance.new("Frame",Main)
 	Items.BackgroundTransparency = 1
-	Items.Position = UDim2.new(0,0,1,5)
-	Items.Size = UDim2.new(1,0,0,0)        -- Começa com altura 0
-	Items.Visible = false                  -- Começa invisível
+	Items.Position = UDim2.new(0,0,0,45)
+	Items.Size = UDim2.new(1,0,1,-45)
+	Items.Visible = false
 
 	local UIList = Instance.new("UIListLayout",Items)
 	UIList.Padding = UDim.new(0,8)
 	UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 	local function updateSize()
-		local content = UIList.AbsoluteContentSize.Y
-		local newHeight = math.clamp(content + 90,120,350)
+		if minimized then return end
+		local contentHeight = UIList.AbsoluteContentSize.Y
+		local newHeight = math.clamp(contentHeight + 80, 120, 350)
 		fullHeight = newHeight
-		if not minimized then
-			Main:TweenSize(UDim2.new(0,250,0,newHeight),"Out","Quad",0.2,true)
-		end
+		Main:TweenSize(UDim2.new(0,250,0,newHeight),"Out","Quad",0.2,true)
 	end
-	UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSize)
 
-	local function setItemsVisible(v)
-		Items.Visible = v
-		for _,c in Items:GetChildren() do
-			if c:IsA("Frame") then
-				c.Visible = v
-				for _,s in c:GetChildren() do
-					if s:IsA("GuiButton") or s:IsA("TextLabel") then
-						s.Visible = v
-						if s:IsA("GuiButton") then s.Active = v end
-					end
-				end
-			end
-		end
-	end
+	UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSize)
 
 	MinBtn.MouseButton1Click:Connect(function()
 		minimized = not minimized
 		if minimized then
-			setItemsVisible(false)
-			TweenService:Create(Main,TweenInfo.new(0.2),{Size=UDim2.new(0,250,0,40)}):Play()
+			Items.Visible = false
+			TweenService:Create(Main,TweenInfo.new(0.2),{Size = UDim2.new(0,250,0,40)}):Play()
 			MinBtn.Text = "+"
 		else
-			setItemsVisible(true)
-			TweenService:Create(Main,TweenInfo.new(0.2),{Size=UDim2.new(0,250,0,fullHeight)}):Play()
+			Items.Visible = true
+			updateSize()
 			MinBtn.Text = "-"
 		end
 	end)
@@ -279,7 +264,10 @@ function lib:Window(opts)
 		local function toggle()
 			open = not open
 			listHolder.Visible = open
-			if open then reposition() scrolling.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y+10) end
+			if open then
+				reposition()
+				scrolling.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+			end
 			arrow.Text = open and "-" or "+"
 		end
 
@@ -297,7 +285,9 @@ function lib:Window(opts)
 			end
 		end)
 
-		Main:GetPropertyChangedSignal("AbsolutePosition"):Connect(function() if open then reposition() end end)
+		Main:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+			if open then reposition() end
+		end)
 
 		for i,opt in ipairs(options) do
 			local b = Instance.new("TextButton",scrolling)
@@ -311,7 +301,9 @@ function lib:Window(opts)
 			b.MouseEnter:Connect(function()b.BackgroundTransparency=0.5 b.BackgroundColor3=Color3.fromRGB(70,70,70)end)
 			b.MouseLeave:Connect(function()b.BackgroundTransparency=1 end)
 			b.MouseButton1Click:Connect(function()
-				selected = i btn.Text = opt toggle()
+				selected = i
+				btn.Text = opt
+				toggle()
 				if opts.Callback then pcall(opts.Callback,opt) end
 			end)
 		end
@@ -321,7 +313,9 @@ function lib:Window(opts)
 		return {
 			Get = function() return options[selected] end,
 			Set = function(v)
-				for i,o in ipairs(options) do if o == v then selected = i btn.Text = v break end end
+				for i,o in ipairs(options) do
+					if o == v then selected = i btn.Text = v break end
+				end
 			end
 		}
 	end
@@ -353,37 +347,61 @@ function lib:Window(opts)
 		fill.BackgroundColor3 = Color3.fromRGB(0,170,255)
 		Instance.new("UICorner",fill).CornerRadius = UDim.new(0,7)
 
-		local val = Instance.new("TextLabel",container)
-		val.Size = UDim2.new(0,50,0,20)
-		val.Position = UDim2.new(1,-55,0,26)
-		val.BackgroundTransparency = 1
-		val.TextColor3 = Color3.fromRGB(220,220,220)
-		val.Font = Enum.Font.LuckiestGuy
-		val.TextSize = 17
-		val.TextXAlignment = Enum.TextXAlignment.Center
-		val.Text = tostring(opts.Default or opts.Min or 0)
+		local valLabel = Instance.new("TextLabel",container)
+		valLabel.Size = UDim2.new(0,50,0,20)
+		valLabel.Position = UDim2.new(1,-55,0,26)
+		valLabel.BackgroundTransparency = 1
+		valLabel.TextColor3 = Color3.fromRGB(220,220,220)
+		valLabel.Font = Enum.Font.LuckiestGuy
+		valLabel.TextSize = 17
+		valLabel.TextXAlignment = Enum.TextXAlignment.Center
+		valLabel.Text = tostring(opts.Default or opts.Min or 0)
 
-		local minV,maxV,step,cur = opts.Min or 0,opts.Max or 100,opts.Step or 1,opts.Default or (opts.Min or 0)
+		local minV = opts.Min or 0
+		local maxV = opts.Max or 100
+		local step = opts.Step or 1
+		local cur = opts.Default or minV
+
 		local dragging = false
-
 		local function update(x)
-			local pct = math.clamp((x-bar.AbsolutePosition.X)/bar.AbsoluteSize.X,0,1)
-			cur = minV + math.floor((maxV-minV)*pct/step+0.5)*step
+			local pct = math.clamp((x - bar.AbsolutePosition.X)/bar.AbsoluteSize.X,0,1)
+			cur = minV + math.floor((maxV-minV)*pct/step + 0.5)*step
 			cur = math.clamp(cur,minV,maxV)
 			fill.Size = UDim2.new(pct,0,1,0)
-			val.Text = tostring(cur)
+			valLabel.Text = tostring(cur)
 			if opts.Callback then pcall(opts.Callback,cur) end
 		end
 
-		bar.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=true update(i.Position.X)end end)
-		bar.InputChanged:Connect(function(i)if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then update(i.Position.X)end end)
-		UIS.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=false end end)
+		bar.InputBegan:Connect(function(i)
+			if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+				dragging = true
+				update(i.Position.X)
+			end
+		end)
+		bar.InputChanged:Connect(function(i)
+			if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+				update(i.Position.X)
+			end
+		end)
+		UIS.InputEnded:Connect(function(i)
+			if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+				dragging = false
+			end
+		end)
 
 		fill.Size = UDim2.new((cur-minV)/(maxV-minV),0,1,0)
-		val.Text = tostring(cur)
+		valLabel.Text = tostring(cur)
 		updateSize()
 
-		return {Get=function()return cur end,Set=function(v)cur=math.clamp(v,minV,maxV)fill.Size=UDim2.new((cur-minV)/(maxV-minV),0,1,0)val.Text=tostring(cur)if opts.Callback then pcall(opts.Callback,cur)end end}
+		return {
+			Get = function() return cur end,
+			Set = function(v)
+				cur = math.clamp(v,minV,maxV)
+				fill.Size = UDim2.new((cur-minV)/(maxV-minV),0,1,0)
+				valLabel.Text = tostring(cur)
+				if opts.Callback then pcall(opts.Callback,cur) end
+			end
+		}
 	end
 
 	return api
