@@ -30,7 +30,8 @@ local function enableDrag(frame, dragArea)
 end
 
 function lib:Window(opts)
-	local ScreenGui = Instance.new("ScreenGui",Player:WaitForChild("PlayerGui"))
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
 
@@ -42,13 +43,15 @@ function lib:Window(opts)
 	Main.BorderSizePixel = 0
 	Instance.new("UICorner",Main).CornerRadius = UDim.new(0,7)
 
-	local TopBar = Instance.new("Frame",Main)
+	local TopBar = Instance.new("Frame")
+	TopBar.Parent = Main
 	TopBar.Size = UDim2.new(1,0,0,40)
 	TopBar.BackgroundColor3 = Color3.fromRGB(28,28,28)
 	TopBar.BorderSizePixel = 0
 	Instance.new("UICorner",TopBar).CornerRadius = UDim.new(0,7)
 
-	local Title = Instance.new("TextLabel",TopBar)
+	local Title = Instance.new("TextLabel")
+	Title.Parent = TopBar
 	Title.Text = opts.Text or "Window"
 	Title.Font = Enum.Font.LuckiestGuy
 	Title.TextSize = 17
@@ -58,7 +61,8 @@ function lib:Window(opts)
 	Title.Size = UDim2.new(1,-50,1,0)
 	Title.TextXAlignment = Enum.TextXAlignment.Left
 
-	local MinBtn = Instance.new("TextButton",TopBar)
+	local MinBtn = Instance.new("TextButton")
+	MinBtn.Parent = TopBar
 	MinBtn.Size = UDim2.new(0,40,1,0)
 	MinBtn.Position = UDim2.new(1,-40,0,0)
 	MinBtn.BackgroundTransparency = 1
@@ -68,22 +72,24 @@ function lib:Window(opts)
 	MinBtn.TextColor3 = Color3.fromRGB(200,200,200)
 	MinBtn.AutoButtonColor = false
 
-	local minimized = false
-	local fullHeight = 200
-
-	local Items = Instance.new("Frame",Main)
+	local Items = Instance.new("Frame")
+	Items.Parent = Main
 	Items.BackgroundTransparency = 1
 	Items.Position = UDim2.new(0,0,0,45)
 	Items.Size = UDim2.new(1,0,1,-45)
 
-	local UIList = Instance.new("UIListLayout",Items)
+	local UIList = Instance.new("UIListLayout")
+	UIList.Parent = Items
 	UIList.Padding = UDim.new(0,8)
 	UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
+	local minimized = false
+	local fullHeight = 200
+
 	local function updateSize()
-		local newHeight = math.clamp(UIList.AbsoluteContentSize.Y + 80,120,350)
+		local newHeight = math.clamp(UIList.AbsoluteContentSize.Y + 80,120,450)
 		if not minimized then
-			Main:TweenSize(UDim2.new(0,250,0,newHeight),"Out","Quad",0.15,true)
+			Main:TweenSize(UDim2.new(0,250,0,newHeight),"Out","Quad",0.2,true)
 			fullHeight = newHeight
 		end
 	end
@@ -91,15 +97,7 @@ function lib:Window(opts)
 
 	local function setItemsVisible(v)
 		for _,c in Items:GetChildren() do
-			if c:IsA("Frame") then
-				c.Visible = v
-				for _,s in c:GetChildren() do
-					if s:IsA("GuiButton") or s:IsA("TextLabel") then
-						s.Visible = v
-						if s:IsA("GuiButton") then s.Active = v end
-					end
-				end
-			end
+			if c:IsA("GuiObject") then c.Visible = v end
 		end
 	end
 
@@ -107,13 +105,11 @@ function lib:Window(opts)
 		minimized = not minimized
 		if minimized then
 			setItemsVisible(false)
-			TweenService:Create(Main,TweenInfo.new(0.2),{Size=UDim2.new(0,250,0,40)}):Play()
-			TweenService:Create(Items,TweenInfo.new(0.15),{Size=UDim2.new(1,0,0,0)}):Play()
+			TweenService:Create(Main,TweenInfo.new(0.25),{Size=UDim2.new(0,250,0,40)}):Play()
 			MinBtn.Text = "+"
 		else
 			setItemsVisible(true)
-			TweenService:Create(Main,TweenInfo.new(0.2),{Size=UDim2.new(0,250,0,fullHeight)}):Play()
-			TweenService:Create(Items,TweenInfo.new(0.15),{Size=UDim2.new(1,0,1,-45)}):Play()
+			TweenService:Create(Main,TweenInfo.new(0.25),{Size=UDim2.new(0,250,0,fullHeight)}):Play()
 			MinBtn.Text = "-"
 		end
 	end)
@@ -122,7 +118,48 @@ function lib:Window(opts)
 
 	local api = {}
 
+	function api:Label(opts)
+		opts = opts or {}
+		local container = Instance.new("Frame")
+		container.Parent = Items
+		container.Size = UDim2.new(0,215,0,26)
+		container.BackgroundTransparency = 1
+
+		local label = Instance.new("TextLabel")
+		label.Parent = container
+		label.Size = UDim2.new(1,-24,1,0)
+		label.Position = UDim2.new(0,12,0,0)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.LuckiestGuy
+		label.TextSize = 17
+		label.TextColor3 = opts.Color or Color3.fromRGB(220,220,220)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Text = opts.Text or "Label"
+		label.TextTruncate = Enum.TextTruncate.AtEnd
+
+		local function refresh() task.spawn(updateSize) end
+
+		local labelApi = {}
+		function labelApi:Set(data)
+			if typeof(data) == "table" then
+				if data.Text ~= nil then label.Text = tostring(data.Text) end
+				if data.TextColor3 ~= nil then label.TextColor3 = data.TextColor3 end
+				if data.Color ~= nil then label.TextColor3 = data.Color end
+			else
+				label.Text = tostring(data)
+			end
+			refresh()
+		end
+		function labelApi:SetColor(color) label.TextColor3 = color refresh() end
+		function labelApi:Get() return label.Text end
+		labelApi.Update = labelApi.Set
+
+		refresh()
+		return labelApi
+	end
+
 	function api:Button(opts)
+		opts = opts or {}
 		local f = Instance.new("Frame",Items)
 		f.Size = UDim2.new(0,215,0,32)
 		f.BackgroundTransparency = 1
@@ -139,13 +176,21 @@ function lib:Window(opts)
 		b.MouseLeave:Connect(function()b.TextColor3=Color3.fromRGB(220,220,220)end)
 		b.MouseButton1Click:Connect(function()
 			b.TextColor3 = Color3.fromRGB(100,200,255)
-			task.delay(0.15,function()b.TextColor3=Color3.fromRGB(255,255,255)task.delay(0.15,function()b.TextColor3=Color3.fromRGB(220,220,220)end)end)
+			task.delay(0.15,function()
+				if b and b.Parent then
+					b.TextColor3 = Color3.fromRGB(255,255,255)
+					task.delay(0.15,function()
+						if b and b.Parent then b.TextColor3 = Color3.fromRGB(220,220,220) end
+					end)
+				end
+			end)
 			if opts.Callback then pcall(opts.Callback) end
 		end)
 		updateSize()
 	end
 
 	function api:Toggle(opts)
+		opts = opts or {}
 		local c = Instance.new("Frame",Items)
 		c.Size = UDim2.new(0,215,0,32)
 		c.BackgroundTransparency = 1
@@ -192,27 +237,8 @@ function lib:Window(opts)
 		return {Set=set,Get=function()return state end}
 	end
 
-	function api:Label(opts)
-		local f = Instance.new("Frame",Items)
-		f.Size = UDim2.new(0,215,0,24)
-		f.BackgroundTransparency = 1
-		local l = Instance.new("TextLabel",f)
-		l.Size = UDim2.new(1,0,1,0)
-		l.BackgroundTransparency = 1
-		l.Font = Enum.Font.LuckiestGuy
-		l.TextSize = 17
-		l.TextColor3 = opts.Color or Color3.fromRGB(220,220,220)
-		l.Text = opts.Text or "Label"
-		l.TextXAlignment = Enum.TextXAlignment.Left
-		updateSize()
-		return {
-			Set = function(self,text) l.Text = text end,
-			Update = function(self,text) l.Text = text end,
-			SetColor = function(self,color) l.TextColor3 = color end
-		}
-	end
-
 	function api:Dropdown(opts)
+		opts = opts or {}
 		local container = Instance.new("Frame")
 		container.Size = UDim2.new(0,215,0,56)
 		container.BackgroundTransparency = 1
@@ -338,6 +364,7 @@ function lib:Window(opts)
 	end
 
 	function api:Slider(opts)
+		opts = opts or {}
 		local container = Instance.new("Frame")
 		container.Size = UDim2.new(0,215,0,50)
 		container.BackgroundTransparency = 1
