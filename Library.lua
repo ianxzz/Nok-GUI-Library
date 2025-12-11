@@ -205,7 +205,11 @@ function lib:Window(opts)
 		l.Text = opts.Text or "Label"
 		l.TextXAlignment = Enum.TextXAlignment.Left
 		updateSize()
-		return {Set=function(p)for i,v in pairs(p)do l[i]=v end end}
+		return {
+			Set = function(self,text) l.Text = text end,
+			Update = function(self,text) l.Text = text end,
+			SetColor = function(self,color) l.TextColor3 = color end
+		}
 	end
 
 	function api:Dropdown(opts)
@@ -238,10 +242,10 @@ function lib:Window(opts)
 		arrow.Size = UDim2.new(0,30,1,0)
 		arrow.Position = UDim2.new(1,-35,0,0)
 		arrow.BackgroundTransparency = 1
-		arrow.Text = "Down Arrow"
+		arrow.Text = "+"
 		arrow.TextColor3 = Color3.fromRGB(220,220,220)
-		arrow.Font = Enum.Font.LuckiestGuy
-		arrow.TextSize = 18
+		arrow.Font = Enum.Font.SourceSansBold
+		arrow.TextSize = 20
 
 		local listHolder = Instance.new("Frame")
 		listHolder.Size = UDim2.new(0,140,0,150)
@@ -279,7 +283,7 @@ function lib:Window(opts)
 				reposition()
 				scrolling.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
 			end
-			arrow.Text = open and "Up Arrow" or "Down Arrow"
+			arrow.Text = open and "-" or "+"
 		end
 
 		btn.MouseButton1Click:Connect(toggle)
