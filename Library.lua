@@ -4,8 +4,6 @@ local Player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-local subHolder = false
-
 local function enableDrag(frame, dragArea)
 	local dragging, dragInput, startPos, startInputPos
 	dragArea.InputBegan:Connect(function(input)
@@ -53,7 +51,7 @@ function lib:Window(opts)
 	local Title = Instance.new("TextLabel",TopBar)
 	Title.Text = opts.Text or "Window"
 	Title.Font = Enum.Font.LuckiestGuy
-	Title.TextSize = subHolder and 16 or 17
+	Title.TextSize = 17
 	Title.TextColor3 = Color3.fromRGB(255,255,255)
 	Title.BackgroundTransparency = 1
 	Title.Position = UDim2.new(0,12,0,0)
@@ -66,7 +64,7 @@ function lib:Window(opts)
 	MinBtn.BackgroundTransparency = 1
 	MinBtn.Text = "-"
 	MinBtn.Font = Enum.Font.LuckiestGuy
-	MinBtn.TextSize = subHolder and 16 or 17
+	MinBtn.TextSize = 17
 	MinBtn.TextColor3 = Color3.fromRGB(200,200,200)
 	MinBtn.AutoButtonColor = false
 
@@ -133,7 +131,7 @@ function lib:Window(opts)
 		b.BackgroundTransparency = 1
 		b.Text = opts.Text or "Button"
 		b.Font = Enum.Font.LuckiestGuy
-		b.TextSize = subHolder and 16 or 17
+		b.TextSize = 17
 		b.TextColor3 = Color3.fromRGB(220,220,220)
 		b.TextXAlignment = Enum.TextXAlignment.Left
 		b.Position = UDim2.new(0,12,0,0)
@@ -156,7 +154,7 @@ function lib:Window(opts)
 		l.Position = UDim2.new(0,12,0,0)
 		l.BackgroundTransparency = 1
 		l.Font = Enum.Font.LuckiestGuy
-		l.TextSize = subHolder and 16 or 17
+		l.TextSize = 17
 		l.TextColor3 = Color3.fromRGB(220,220,220)
 		l.Text = opts.Text or "Toggle"
 		l.TextXAlignment = Enum.TextXAlignment.Left
@@ -202,7 +200,7 @@ function lib:Window(opts)
 		l.Size = UDim2.new(1,0,1,0)
 		l.BackgroundTransparency = 1
 		l.Font = Enum.Font.LuckiestGuy
-		l.TextSize = subHolder and 16 or 17
+		l.TextSize = 17
 		l.TextColor3 = opts.Color or Color3.fromRGB(220,220,220)
 		l.Text = opts.Text or "Label"
 		l.TextXAlignment = Enum.TextXAlignment.Left
@@ -221,7 +219,7 @@ function lib:Window(opts)
 		label.Position = UDim2.new(0,12,0,0)
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.LuckiestGuy
-		label.TextSize = subHolder and 16 or 17
+		label.TextSize = 17
 		label.TextColor3 = Color3.fromRGB(220,220,220)
 		label.Text = opts.Text or "Dropdown"
 		label.TextXAlignment = Enum.TextXAlignment.Left
@@ -233,7 +231,7 @@ function lib:Window(opts)
 		btn.Text = opts.Options and opts.Options[1] or "Select"
 		btn.TextColor3 = Color3.fromRGB(220,220,220)
 		btn.Font = Enum.Font.LuckiestGuy
-		btn.TextSize = subHolder and 16 or 17
+		btn.TextSize = 17
 		Instance.new("UICorner",btn).CornerRadius = UDim.new(0,7)
 
 		local arrow = Instance.new("TextLabel",btn)
@@ -245,15 +243,22 @@ function lib:Window(opts)
 		arrow.Font = Enum.Font.LuckiestGuy
 		arrow.TextSize = 18
 
-		local list = Instance.new("Frame")
-		list.Size = UDim2.new(0,130,0,0)
-		list.BackgroundColor3 = Color3.fromRGB(40,40,40)
-		list.ClipsDescendants = true
-		list.Visible = false
-		Instance.new("UICorner",list).CornerRadius = UDim.new(0,7)
-		list.Parent = ScreenGui
+		local listHolder = Instance.new("Frame")
+		listHolder.Size = UDim2.new(0,140,0,150)
+		listHolder.BackgroundColor3 = Color3.fromRGB(40,40,40)
+		listHolder.ClipsDescendants = true
+		listHolder.Visible = false
+		Instance.new("UICorner",listHolder).CornerRadius = UDim.new(0,7)
+		listHolder.Parent = ScreenGui
 
-		local layout = Instance.new("UIListLayout",list)
+		local scrolling = Instance.new("ScrollingFrame",listHolder)
+		scrolling.Size = UDim2.new(1,0,1,0)
+		scrolling.BackgroundTransparency = 1
+		scrolling.BorderSizePixel = 0
+		scrolling.ScrollBarThickness = 6
+		scrolling.ScrollBarImageColor3 = Color3.fromRGB(100,100,100)
+
+		local layout = Instance.new("UIListLayout",scrolling)
 		layout.Padding = UDim.new(0,2)
 
 		local open = false
@@ -264,17 +269,15 @@ function lib:Window(opts)
 			local mainPos = Main.AbsolutePosition
 			local mainSize = Main.AbsoluteSize
 			local btnPos = btn.AbsolutePosition
-			list.Position = UDim2.new(0,mainPos.X + mainSize.X + 5,0,btnPos.Y)
+			listHolder.Position = UDim2.new(0,mainPos.X + mainSize.X + 5,0,btnPos.Y)
 		end
 
 		local function toggle()
 			open = not open
-			list.Visible = open
+			listHolder.Visible = open
 			if open then
 				reposition()
-				TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{Size=UDim2.new(0,130,0,math.min(#options*34,150))}):Play()
-			else
-				TweenService:Create(list,TweenInfo.new(0.25,Enum.EasingStyle.Quint),{Size=UDim2.new(0,130,0,0)}):Play()
+				scrolling.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
 			end
 			arrow.Text = open and "Up Arrow" or "Down Arrow"
 		end
@@ -284,11 +287,11 @@ function lib:Window(opts)
 		UIS.InputBegan:Connect(function(i)
 			if open and i.UserInputType == Enum.UserInputType.MouseButton1 then
 				local p = i.Position
-				local a = list.AbsolutePosition
-				local s = list.AbsoluteSize
+				local la = listHolder.AbsolutePosition
+				local ls = listHolder.AbsoluteSize
 				local ba = btn.AbsolutePosition
 				local bs = btn.AbsoluteSize
-				if not (p.X >= a.X and p.X <= a.X+s.X and p.Y >= a.Y and p.Y <= a.Y+s.Y or
+				if not (p.X >= la.X and p.X <= la.X+ls.X and p.Y >= la.Y and p.Y <= la.Y+ls.Y or
 				        p.X >= ba.X and p.X <= ba.X+bs.X and p.Y >= ba.Y and p.Y <= ba.Y+bs.Y) then
 					toggle()
 				end
@@ -300,13 +303,13 @@ function lib:Window(opts)
 		end)
 
 		for i,opt in ipairs(options) do
-			local b = Instance.new("TextButton",list)
+			local b = Instance.new("TextButton",scrolling)
 			b.Size = UDim2.new(1,-8,0,32)
 			b.BackgroundTransparency = 1
 			b.Text = "  "..opt
 			b.TextXAlignment = Enum.TextXAlignment.Left
 			b.Font = Enum.Font.LuckiestGuy
-			b.TextSize = subHolder and 16 or 17
+			b.TextSize = 17
 			b.TextColor3 = Color3.fromRGB(220,220,220)
 			b.MouseEnter:Connect(function()b.BackgroundTransparency=0.5 b.BackgroundColor3=Color3.fromRGB(70,70,70)end)
 			b.MouseLeave:Connect(function()b.BackgroundTransparency=1 end)
@@ -341,7 +344,7 @@ function lib:Window(opts)
 		label.Position = UDim2.new(0,12,0,0)
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.LuckiestGuy
-		label.TextSize = subHolder and 16 or 17
+		label.TextSize = 17
 		label.TextColor3 = Color3.fromRGB(220,220,220)
 		label.Text = opts.Text or "Slider"
 		label.TextXAlignment = Enum.TextXAlignment.Left
@@ -363,7 +366,7 @@ function lib:Window(opts)
 		valLabel.BackgroundTransparency = 1
 		valLabel.TextColor3 = Color3.fromRGB(220,220,220)
 		valLabel.Font = Enum.Font.LuckiestGuy
-		valLabel.TextSize = subHolder and 16 or 17
+		valLabel.TextSize = 17
 		valLabel.TextXAlignment = Enum.TextXAlignment.Center
 		valLabel.Text = tostring(opts.Default or opts.Min or 0)
 
