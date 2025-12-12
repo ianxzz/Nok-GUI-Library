@@ -2,7 +2,7 @@ local lib = {}
 
 local Player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
- TweenService = game:GetService("TweenService")
+local TweenService = game:GetService("TweenService")
 
 local function enableDrag(frame, dragArea)
 	local dragging, dragInput, startPos, startInputPos
@@ -92,6 +92,7 @@ local function createWindow(name, posX, posY)
 	ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ScreenGui.ResetOnSpawn = false
+	ScreenGui.DisplayOrder = 999999999
 
 	local Main = Instance.new("Frame")
 	Main.Size = UDim2.new(0,250,0,200)
