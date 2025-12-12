@@ -29,53 +29,64 @@ local function enableDrag(frame, dragArea)
 	end)
 end
 
-local function CreateNotification(Title, Text, Duration)
-	Duration = Duration or 4
+local function CreateNotification(data)
+	local Title = data.Title or "Notificação"
+	local Text = data.Text or ""
+	local Duration = data.Duration or 4
+
 	local pgui = Player:WaitForChild("PlayerGui")
 	local gui = Instance.new("ScreenGui")
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 999999999
 	gui.Parent = pgui
+
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.new(0,280,0,78)
 	frame.Position = UDim2.new(1,20,0,168)
 	frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 	frame.BorderSizePixel = 0
 	frame.Parent = gui
+
 	Instance.new("UICorner",frame).CornerRadius = UDim.new(0,12)
+
 	local stroke = Instance.new("UIStroke",frame)
 	stroke.Thickness = 2
 	stroke.Color = Color3.fromRGB(60,60,60)
 	stroke.Transparency = 0.3
+
 	local title = Instance.new("TextLabel",frame)
 	title.Size = UDim2.new(1,-20,0,28)
 	title.Position = UDim2.new(0,10,0,8)
 	title.BackgroundTransparency = 1
-	title.Text = Title or "Notificação"
+	title.Text = Title
 	title.TextColor3 = Color3.fromRGB(255,255,255)
 	title.FontFace = Font.fromEnum(Enum.Font.GothamBold)
 	title.TextSize = 24
 	title.TextXAlignment = Enum.TextXAlignment.Left
+
 	local desc = Instance.new("TextLabel",frame)
 	desc.Size = UDim2.new(1,-20,0,36)
 	desc.Position = UDim2.new(0,10,0,34)
 	desc.BackgroundTransparency = 1
-	desc.Text = Text or ""
+	desc.Text = Text
 	desc.TextColor3 = Color3.fromRGB(200,200,200)
 	desc.FontFace = Font.fromEnum(Enum.Font.Gotham)
 	desc.TextSize = 18
 	desc.TextWrapped = true
 	desc.TextXAlignment = Enum.TextXAlignment.Left
 	desc.TextYAlignment = Enum.TextYAlignment.Top
+
 	local barBg = Instance.new("Frame",frame)
 	barBg.Size = UDim2.new(1,0,0,5)
 	barBg.Position = UDim2.new(0,0,1,-5)
 	barBg.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	Instance.new("UICorner",barBg).CornerRadius = UDim.new(0,3)
+
 	local bar = Instance.new("Frame",barBg)
 	bar.Size = UDim2.new(1,0,1,0)
 	bar.BackgroundColor3 = Color3.fromRGB(100,149,237)
-	frame:TweenPosition(UDim2.new(0,626,0,168),"Out","Quint",0.5,true)
+
+	frame:TweenPosition(UDim2.new(1,-300,0,168),"Out","Quint",0.5,true)
 	bar:TweenSize(UDim2.new(0,0,1,0),"In","Linear",Duration,true)
 	task.wait(Duration + 0.5)
 	frame:TweenPosition(UDim2.new(1,20,0,168),"In","Quint",0.4,true)
@@ -84,7 +95,9 @@ local function CreateNotification(Title, Text, Duration)
 end
 
 function lib:Notify(data)
-	task.spawn(CreateNotification,data.Title or "Title",data.Text or "",data.Duration or 5)
+	if typeof(data) == "table" then
+		task.spawn(CreateNotification, data)
+	end
 end
 
 local function createWindow(name, posX, posY)
